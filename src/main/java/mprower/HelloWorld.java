@@ -1,95 +1,145 @@
-package mprower;
-
-import com.google.gson.Gson;
+package mprower.javaspark.model;
 
 import static spark.Spark.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import com.google.gson.Gson;
+import mprower.javaspark.repository.UserRepository;
+import mprower.javaspark.api.ItemController;
 
-public class HelloWorld {
+import java.util.Optional;
 
-    private static final Gson gson = new Gson();
-
+public class AppController {
     public static void main(String[] args) {
-        // 1. Obtener el puerto configurado
-        int appPort = getPort();
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8080"));
+        port(port);
 
-        // 2. Establecer el puerto en Spark
-        port(appPort);
+        Gson gson = new Gson();
+        UserRepository repository = new UserRepository(); // Instancia del repositorio
 
-        // En main justo después de port()
-        exception(Exception.class, (e, req, res) -> {
+        // --- Habilitar CORS ---
+        enableCORS();
+
+        // --- API REST de Usuarios (CRUD) ---
+
+        /**
+         * POST /api/users — Crear un nuevo usuario.
+         * Body: JSON con username, email, role.
+         */
+        post("/api/users", (req, res) -> {
             res.type("application/json");
-            res.status(500);
-            res.body(gson.toJson(new Exception("Internal server error")));
-            e.printStackTrace();
+            try {
+                User newUser = gson.fromJson(req.body(), User.class);
+                User createdUser = repository.createUser(newUser); // Delegar al repo
+                res.status(201); // 201 Created
+                return gson.toJson(createdUser);
+            } catch (IllegalArgumentException e) {
+                res.status(400); // Bad Request (por validación fallida)
+                return gson.toJson(new ErrorResponse(e.getMessage()));
+            } catch (Exception e) {
+                res.status(400); // Bad Request (por JSON mal formado)
+                return gson.toJson(new ErrorResponse(e.getMessage()));
+            }
         });
 
-        // 3. Inicializar el resto de tu API (ej. tus rutas de UserApi)
-        // Puedes mover el código de tu 'UserApi.main()' a un método 'init()'
-        // y llamarlo aquí.
-        // new UserApi().init(); // <- Ejemplo de cómo lo estructurarías
-
-        // Ruta de ejemplo para probar que el puerto funciona
-        get("/hello-port", (req, res) -> {
-            res.type("text/plain");
-            return "¡Hola! El servidor está corriendo en el puerto: " + appPort;
+        /**
+         * GET /api/users — Obtener todos los usuarios.
+         */
+        get("/api/users", (req, res) -> {
+            res.type("application/json");
+            return gson.toJson(repository.getAllUsers());
         });
 
-        System.out.println("Servidor Spark iniciado. Escuchando en http://localhost:" + appPort);
+        /**
+         * GET /api/users/:id — Obtener un usuario por ID.
+         */
+        get("/api/users/:id", (req, res) -> {
+            res.type("application/json");
+            String id = req.params(":id");
+            Optional<User> user = repository.getUserById(id);
+
+            if (user.isPresent()) {
+                return gson.toJson(user.get());
+            } else {
+                res.status(404); // Not Found
+                return gson.toJson(new ErrorResponse("User not found with id: " + id));
+            }
+        });
+
+        /**
+         * PUT /api/users/:id — Actualizar un usuario por ID.
+         * Body: JSON con username, email, role.
+         */
+        put("/api/users/:id", (req, res) -> {
+            res.type("application/json");
+            String id = req.params(":id");
+
+            try {
+                User updatedUser = gson.fromJson(req.body(), User.class);
+                Optional<User> result = repository.updateUser(id, updatedUser);
+
+                if (result.isPresent()) {
+                    return gson.toJson(result.get());
+                } else {
+                    res.status(404); // Not Found
+                    return gson.toJson(new ErrorResponse("User not found with id: " + id));
+                }
+            } catch (IllegalArgumentException e) {
+                res.status(400); // Bad Request (validación)
+                return gson.toJson(new ErrorResponse(e.getMessage()));
+            } catch (Exception e) {
+                res.status(400); // Bad Request (JSON)
+                return gson.toJson(new ErrorResponse(e.getMessage()));
+            }
+        });
+
+        /**
+         * DELETE /api/users/:id — Eliminar un usuario por ID.
+         */
+        delete("/api/users/:id", (req, res) -> {
+            res.type("application/json");
+            String id = req.params(":id");
+            boolean deleted = repository.deleteUser(id);
+
+            if (deleted) {
+                return gson.toJson(new Status("User deleted: " + id));
+            } else {
+                res.status(404); // Not Found
+                return gson.toJson(new ErrorResponse("User not found with id: " + id));
+            }
+        });
+        new ItemController();
     }
 
-    /**
-     * Obtiene el puerto de tres fuentes, en orden de prioridad:
-     * 1. Variable de entorno 'PORT'.
-     * 2. Archivo 'application.properties' (propiedad 'app.port').
-     * 3. Puerto por defecto '4567'.
-     *
-     * @return El puerto a utilizar.
-     */
-    private static int getPort() {
-        // 1. Valor por defecto (mínima prioridad)
-        int defaultPort = 4567;
+    // --- Clases de Utilidad (anidadas) ---
 
-        // 2. Intentar leer de application.properties (media prioridad)
-        Properties properties = new Properties();
-        String propertiesPort = null;
-        try (InputStream input = HelloWorld.class.getResourceAsStream("/application.properties")) {
+    static class Status {
+        String status;
+        Status(String s) { this.status = s; }
+    }
 
-            if (input == null) {
-                System.out.println("No se encontró 'application.properties'. Usando puerto por defecto o variable de entorno.");
-            } else {
-                properties.load(input);
-                propertiesPort = properties.getProperty("app.port");
+    static class ErrorResponse {
+        String message;
+        ErrorResponse(String m) { this.message = m; }
+    }
+
+    // --- Método de Configuración CORS (tu código original) ---
+    private static void enableCORS() {
+        options("/*", (request, response) -> {
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
             }
-
-        } catch (IOException ex) {
-            System.err.println("Error al leer 'application.properties': " + ex.getMessage());
-        }
-
-        if (propertiesPort != null) {
-            try {
-                defaultPort = Integer.parseInt(propertiesPort);
-                System.out.println("Port loaded from 'application.properties': " + defaultPort);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid 'app.port' value in 'application.properties'. Ignoring.");
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
             }
-        }
+            return "OK";
+        });
 
-        // 3. Intentar leer de Variable de Entorno (máxima prioridad)
-        String envPort = System.getenv("PORT");
-        if (envPort != null) {
-            try {
-                int port = Integer.parseInt(envPort);
-                System.out.println("Puerto cargado desde variable de entorno 'PORT': " + port);
-                return port; // La variable de entorno GANA
-            } catch (NumberFormatException e) {
-                System.err.println("Variable de entorno 'PORT' inválida. Usando puerto de properties o por defecto.");
-            }
-        }
-
-        // Devuelve el puerto de properties o el default si no hay variable de entorno
-        return defaultPort;
+        before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Request-Method", "GET, POST, PUT, DELETE, OPTIONS");
+            response.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+            response.header("Access-Control-Allow-Credentials", "true");
+        });
     }
 }

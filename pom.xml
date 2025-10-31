@@ -29,21 +29,19 @@
             <version>${spark.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.sparkjava</groupId>
+            <artifactId>spark-template-mustache</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+
+
         <!-- Gson for JSON serialization -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${gson.version}</version>
         </dependency>
-
-        <!-- Jackson (Alternativa a Gson para JSON) - Descomenta si lo prefieres -->
-        <!--
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        -->
 
         <!-- SLF4J + Logback for logging -->
         <dependency>
@@ -72,6 +70,13 @@
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <version>0.9.10</version>
+        </dependency>
+
     </dependencies>
 
     <build>

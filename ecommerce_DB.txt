@@ -1,0 +1,99 @@
+create database ecommerce;
+
+use ecommerce;
+
+create table cliente (
+id int auto_increment not null, 
+nombre varchar (40),
+password varchar (100),
+numero varchar (20),
+constraint primary key(id));
+
+desc cliente;
+
+create table descripcion(
+id int auto_increment,
+descripcion varchar(200), 
+constraint primary key(id));
+
+desc descripcion;
+
+create table producto(
+id int auto_increment not null,
+nombre varchar(60),
+prec float(10,2),
+foto varchar(100),
+cantidad int,
+id_descr int,
+constraint foreign key(id_descr) references descripcion(id),
+constraint primary key(id)
+);
+
+desc producto;
+
+create table carrito (
+id int auto_increment,
+id_cli int,
+id_pro int,
+cantidad int,
+constraint primary key(id),
+constraint foreign key(id_cli) references cliente(id), 
+constraint foreign key(id_pro) references producto(id));
+
+desc carrito;
+
+create table venta (
+id int auto_increment not null,
+fech date,
+folio int default 0,
+total float(10,2) default 0,
+id_cli int,
+constraint primary key(id),
+constraint foreign key(id_cli) references cliente(id));
+
+desc venta;
+
+create table detalle_venta (
+id int auto_increment not null,
+subtotal float(10,2),
+cant int,
+prec float(10,2),
+id_vent int,
+id_pro int,
+constraint primary key(id),
+constraint foreign key(id_vent) references venta(id),
+constraint foreign key(id_pro) references producto(id)
+);
+
+desc detalle_venta;
+
+delimiter //
+create trigger cant before insert on detalle_venta
+for each row
+begin
+declare stock int;
+set stock = (select cantidad from producto where id = new.id_pro);
+if new.cant<=stock then 
+update producto set cantidad = cantidad - new.cant where id = new.id_pro;
+end if;
+end//
+
+delimiter ;
+
+;
+
+INSERT INTO descripcion (descripcion) VALUES ('Una gorra autografiada por el famoso Peso Pluma.'); -- id 1
+INSERT INTO descripcion (descripcion) VALUES ('Un casco autografiado por la famosa cantante Rosalía, una verdadera MOTOMAMI!'); -- id 2
+INSERT INTO descripcion (descripcion) VALUES ('Una chamarra de la marca favorita de Bad Bunny, autografiada por el propio artista.'); -- id 3
+INSERT INTO descripcion (descripcion) VALUES ('Una guitarra acústica de alta calidad utilizada por el famoso cantautor Fernando Delgadillo.'); -- id 4
+INSERT INTO descripcion (descripcion) VALUES ('Un jersey autografiado por el legendario rapero Snoop Dogg.'); -- id 5
+INSERT INTO descripcion (descripcion) VALUES ('Un crop-top usado y autografiado por la famosa rapera Cardi B. en su última visita a México'); -- id 6
+INSERT INTO descripcion (descripcion) VALUES ('Una guitarra eléctrica autografiada por la popular banda británica Coldplay, un día antes de su concierto en Monterrey en 2022.'); -- id 7
+
+INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Gorra autografiada por Peso Pluma', 621.34, 'gorra_pp.jpg', 10, 1);
+INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Casco autografiado por Rosalía', 734.57, 'casco_rosalia.jpg', 5, 2);
+INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Chamarra de Bad Bunny', 521.89, 'chamarra_bb.jpg', 8, 3);
+INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Guitarra de Fernando Delgadillo', 823.12, 'guitarra_fd.jpg', 3, 4);
+INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Jersey firmado por Snoop Dogg', 355.67, 'jersey_snoop.jpg', 15, 5);
+INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Prenda de Cardi B autografiada', 674.23, 'prenda_cardib.jpg', 7, 6);
+INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Guitarra autografiada por Coldplay', 458.91, 'guitarra_coldplay.jpg', 4, 7);

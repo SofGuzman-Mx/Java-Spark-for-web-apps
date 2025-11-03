@@ -3,6 +3,7 @@ package mprower.javaspark;
 import mprower.javaspark.controller.ClienteController;
 import mprower.javaspark.controller.ProductoController;
 import mprower.javaspark.controller.CarritoController;
+import mprower.javaspark.model.Cliente;
 
 import spark.ModelAndView;
 import spark.template.mustache.MustacheTemplateEngine;
@@ -33,7 +34,7 @@ public class App {
             Map<String, Object> model = new HashMap<>();
 
             List<Map<String, Object>> items = new ArrayList<>();
-            items.add(Map.of("id", "1", "nombre", "Gorra autografiada por Peso Pluma", "descripcion" ,"Una gorra autografiada por el famoso Peso Pluma", "prec", "621.34 USD", "foto", "/img/gorraPP.jpg"));
+            items.add(Map.of("id", "1", "nombre", "Gorra autografiada por Peso Pluma", "descripcion", "Una gorra autografiada por el famoso Peso Pluma", "prec", "621.34 USD", "foto", "/img/gorraPP.jpg"));
             items.add(Map.of("id", "2", "nombre", "Casco autografiado por Rosalía", "descripcion", "Un casco autografiado por la famosa cantante Rosalía, una verdadera MOTOMAMI!", "prec", "734.57 USD", "foto", "/img/cascoRosalia.jpg"));
             items.add(Map.of("id", "3", "nombre", "Chamarra de Bad Bunny", "descripcion", "Una chamarra de la marca favorita de Bad Bunny, autografiada por el propio artista.", "prec", "521.89 USD", "foto", "/img/chamarraBB.png"));
             items.add(Map.of("id", "4", "nombre", "Guitarra de Fernando Delgadillo", "descripcion", "Una guitarra acústica de alta calidad utilizada por el famoso cantautor Fernando Delgadillo.", "prec", "823.12 USD", "foto", "/img/guitarraFD.jpg"));
@@ -67,6 +68,11 @@ public class App {
             response.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         });
 
+        // Muestra la página de inicio de sesión
+        get("/login", (req, res) -> {
+            return renderLoginView();
+        }, new MustacheTemplateEngine());
+
         get("/item/:id", (req, res) -> {
             String id = req.params(":id");
 
@@ -78,18 +84,43 @@ public class App {
                     "prec", "621.34",
                     "foto", "/img/gorraPP.jpg"
             );
-
-            private static ModelAndView renderSignupView() {
-                Map<String, Object> model = new HashMap<>();
-                model.put("title", "Registro");
-                model.put("message", "Crea tu cuenta para acceder al catálogo de coleccionables");
-                model.put("error", "");
-                return new ModelAndView(model, "signup.mustache");
-            }
-
-
             return new ModelAndView(item, "item-detail.mustache");
         }, new MustacheTemplateEngine());
 
+        // Muestra la página de INICIAR SESIÓN (Log In)
+        get("/login", (req, res) -> {
+            return renderLoginView();
+        }, new MustacheTemplateEngine());
     }
+
+    post("/api/register", (req, res) -> {
+        String nombre = req.queryParams("nombre");
+        String numero = req.queryParams("numero");
+        String password = req.queryParams("password");
+
+        // Aquí puedes guardar el cliente en tu base de datos
+        System.out.println("Nuevo registro:");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Número: " + numero);
+        System.out.println("Password: " + password);
+
+        // Redirigir al catálogo después del registro
+        res.redirect("/catalog");
+        return null;
+    });
+
+    private static ModelAndView renderSignupView() {
+        Map<String, Object> model = new HashMap<>();
+        model.put("title", "Registro");
+        model.put("message", "Crea tu cuenta para acceder al catálogo de coleccionables");
+        model.put("error", "");
+        return new ModelAndView(model, "signup.mustache");
+    }
+    private static ModelAndView renderLoginView() {
+        Map<String, Object> model = new HashMap<>();
+        model.put("title", "Iniciar sesión - Coleccionables");
+        return new ModelAndView(model, "login.mustache");
+    }
+
+
 }

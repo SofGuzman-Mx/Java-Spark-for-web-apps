@@ -25,12 +25,24 @@ public class ClienteController {
     }
 
     private void initializeRoutes() {
-        // Endpoint de registro
+        // Endpoint de registro adaptado para formulario HTML
         post("/api/register", (req, res) -> {
             res.type("application/json");
             try {
-                Cliente nuevoCliente = gson.fromJson(req.body(), Cliente.class);
+                // Leer parámetros del formulario
+                String nombre = req.queryParams("nombre");
+                String numero = req.queryParams("numero");
+                String password = req.queryParams("password");
+
+                // Crear cliente
+                Cliente nuevoCliente = new Cliente();
+                nuevoCliente.setNombre(nombre);
+                nuevoCliente.setNumero(numero);
+                nuevoCliente.setPassword(password);
+
+                // Guardar en la base de datos
                 Cliente clienteRegistrado = repository.registrar(nuevoCliente);
+
                 res.status(201);
                 return gson.toJson(clienteRegistrado);
             } catch (Exception e) {
@@ -39,7 +51,7 @@ public class ClienteController {
             }
         });
 
-        // Endpoint de login
+    // Endpoint de login
         post("/api/login", (req, res) -> {
             res.type("application/json");
             try {

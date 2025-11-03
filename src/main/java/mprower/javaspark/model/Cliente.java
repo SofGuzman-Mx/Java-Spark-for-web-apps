@@ -1,10 +1,10 @@
 package mprower.javaspark.model;
 
 public class Cliente {
-    private int id;
-    private String nombre;
-    private String password;
-    private String numero;
+    public int id;
+    public String nombre;
+    public String password;
+    public String numero;
 
     public int getId() {
         return id;

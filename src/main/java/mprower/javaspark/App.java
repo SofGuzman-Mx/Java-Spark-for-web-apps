@@ -5,19 +5,15 @@ import mprower.javaspark.controller.ProductoController;
 import mprower.javaspark.controller.CarritoController;
 import mprower.javaspark.model.Cliente;
 
+import java.util.*;
+import static spark.Spark.*;
+
 import spark.ModelAndView;
 import spark.template.mustache.MustacheTemplateEngine;
-
-import java.util.*;
-
-import static spark.Spark.*;
 
 public class App {
     public static void main(String[] args) {
         port(8080);
-
-        // Servir archivos estáticos desde /public
-        staticFiles.location("/public");
 
         // Habilitar CORS
         enableCORS();
@@ -25,29 +21,9 @@ public class App {
         // Inicializar controladores
         new ClienteController();
         new ProductoController();
-        new CarritoController();
-
-        // Endpoint para mostrar el catálogo
-        get("/signup", (req, res) -> renderSignupView(), new MustacheTemplateEngine());
-
-        get("/catalog", (req, res) -> {
-            Map<String, Object> model = new HashMap<>();
-
-            List<Map<String, Object>> items = new ArrayList<>();
-            items.add(Map.of("id", "1", "nombre", "Gorra autografiada por Peso Pluma", "descripcion", "Una gorra autografiada por el famoso Peso Pluma", "prec", "621.34 USD", "foto", "/img/gorraPP.jpg"));
-            items.add(Map.of("id", "2", "nombre", "Casco autografiado por Rosalía", "descripcion", "Un casco autografiado por la famosa cantante Rosalía, una verdadera MOTOMAMI!", "prec", "734.57 USD", "foto", "/img/cascoRosalia.jpg"));
-            items.add(Map.of("id", "3", "nombre", "Chamarra de Bad Bunny", "descripcion", "Una chamarra de la marca favorita de Bad Bunny, autografiada por el propio artista.", "prec", "521.89 USD", "foto", "/img/chamarraBB.png"));
-            items.add(Map.of("id", "4", "nombre", "Guitarra de Fernando Delgadillo", "descripcion", "Una guitarra acústica de alta calidad utilizada por el famoso cantautor Fernando Delgadillo.", "prec", "823.12 USD", "foto", "/img/guitarraFD.jpg"));
-            items.add(Map.of("id", "5", "nombre", "Jersey firmado por Snoop Dogg", "descripcion", "Un jersey autografiado por el legendario rapero Snoop Dogg.", "prec", "355.67 USD", "foto", "/img/jerseySD.png"));
-            items.add(Map.of("id", "6", "nombre", "Prenda de Cardi B autografiada", "descripcion", "Una playera usada y autografiada por la famosa rapera Cardi B. en su última visita a México", "prec", "674.23 USD", "foto", "/img/playeraCB.png"));
-            items.add(Map.of("id", "7", "nombre", "Guitarra autografiada por Coldplay", "descripcion", "Una guitarra eléctrica autografiada por la popular banda británica Coldplay, un día antes de su concierto en Monterrey en 2022", "prec", "458.91 USD", "foto", "/img/guitarraColdplay.png"));
-
-            model.put("items", items);
-            return new ModelAndView(model, "catalog.mustache");
-        }, new MustacheTemplateEngine());
+        new CarritoController(); // Cuando lo implementes
 
         System.out.println("Servidor iniciado en http://localhost:8080");
-
     }
 
     private static void enableCORS() {
@@ -68,59 +44,15 @@ public class App {
             response.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         });
 
-        // Muestra la página de inicio de sesión
         get("/login", (req, res) -> {
             return renderLoginView();
         }, new MustacheTemplateEngine());
 
-        get("/item/:id", (req, res) -> {
-            String id = req.params(":id");
-
-            // Simulación de búsqueda (reemplaza con tu repositorio real)
-            Map<String, Object> item = Map.of(
-                    "id", id,
-                    "nombre", "Gorra autografiada por Peso Pluma",
-                    "descripcion", "Una gorra autografiada por el famoso Peso Pluma",
-                    "prec", "621.34",
-                    "foto", "/img/gorraPP.jpg"
-            );
-            return new ModelAndView(item, "item-detail.mustache");
-        }, new MustacheTemplateEngine());
-
-        // Muestra la página de INICIAR SESIÓN (Log In)
-        get("/login", (req, res) -> {
-            return renderLoginView();
-        }, new MustacheTemplateEngine());
     }
 
-    post("/api/register", (req, res) -> {
-        String nombre = req.queryParams("nombre");
-        String numero = req.queryParams("numero");
-        String password = req.queryParams("password");
-
-        // Aquí puedes guardar el cliente en tu base de datos
-        System.out.println("Nuevo registro:");
-        System.out.println("Nombre: " + nombre);
-        System.out.println("Número: " + numero);
-        System.out.println("Password: " + password);
-
-        // Redirigir al catálogo después del registro
-        res.redirect("/catalog");
-        return null;
-    });
-
-    private static ModelAndView renderSignupView() {
-        Map<String, Object> model = new HashMap<>();
-        model.put("title", "Registro");
-        model.put("message", "Crea tu cuenta para acceder al catálogo de coleccionables");
-        model.put("error", "");
-        return new ModelAndView(model, "signup.mustache");
-    }
     private static ModelAndView renderLoginView() {
         Map<String, Object> model = new HashMap<>();
         model.put("title", "Iniciar sesión - Coleccionables");
         return new ModelAndView(model, "login.mustache");
     }
-
-
 }

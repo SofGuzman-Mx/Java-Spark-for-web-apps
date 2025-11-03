@@ -51,22 +51,23 @@ public class ClienteController {
             }
         });
 
-    // Endpoint de login
         post("/api/login", (req, res) -> {
             res.type("application/json");
             try {
-                JsonObject loginInfo = gson.fromJson(req.body(), JsonObject.class);
-                String nombre = loginInfo.get("nombre").getAsString();
-                String password = loginInfo.get("password").getAsString();
+                // Leer parámetros del formulario
+                String nombre = req.queryParams("nombre");
+                String password = req.queryParams("password");
 
                 Optional<Cliente> clienteOpt = repository.findByNombre(nombre);
 
-                if (clienteOpt.isPresent() && BCrypt.checkpw(password, clienteOpt.get().password)) {
+                if (clienteOpt.isPresent() && BCrypt.checkpw(password, clienteOpt.get().getPassword())) {
                     Cliente cliente = clienteOpt.get();
-                    String token = Auth.generateToken(cliente.id, cliente.nombre);
+                    String token = Auth.generateToken(cliente.getId(), cliente.getNombre());
+
+                    // Puedes redirigir al catálogo o devolver el token
                     return gson.toJson(Map.of("token", token));
                 } else {
-                    res.status(401); // Unauthorized
+                    res.status(401);
                     return gson.toJson(new ErrorResponse("401", "Credenciales incorrectas"));
                 }
             } catch (Exception e) {
@@ -74,5 +75,6 @@ public class ClienteController {
                 return gson.toJson(new ErrorResponse("500", "Error en el login: " + e.getMessage()));
             }
         });
+
     }
 }

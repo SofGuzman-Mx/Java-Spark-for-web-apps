@@ -47,10 +47,12 @@ public class ClienteController {
                 Cliente clienteRegistrado = repository.registrar(nuevoCliente);
 
                 res.status(201);
-                return gson.toJson(clienteRegistrado);
+                //res.redirect("/login");
+                //return gson.toJson(clienteRegistrado);
+                return gson.toJson(Map.of("success", true, "redirectUrl", "/login"));
             } catch (Exception e) {
                 res.status(500);
-                return gson.toJson(new ErrorResponse("500", "Error al registrar cliente: " + e.getMessage()));
+                return gson.toJson(new ErrorResponse("500", "Error registering customer: " + e.getMessage()));
             }
         });
 
@@ -67,16 +69,17 @@ public class ClienteController {
                     Cliente cliente = clienteOpt.get();
                     String token = Auth.generateToken(cliente.getId(), cliente.getNombre());
 
-                    // ✅ Puedes redirigir al catálogo o mostrar una vista de éxito
-                    res.redirect("/catalog");
-                    return null;
+                    // Puedes redirigir al catálogo o devolver el token
+                    //return gson.toJson(Map.of("token", token));
+                    //res.redirect("/catalog");
+                    return gson.toJson(Map.of("success", true, "redirectUrl", "/catalog"));
                 } else {
-                    res.redirect("/error401");
-                    return null;
+                    res.status(401);
+                    return gson.toJson(new ErrorResponse("401", "Incorrect credentials"));
                 }
             } catch (Exception e) {
                 res.status(500);
-                return gson.toJson(new ErrorResponse("500", "Error en el login: " + e.getMessage()));
+                return gson.toJson(new ErrorResponse("500", "Login error: " + e.getMessage()));
             }
         });
 

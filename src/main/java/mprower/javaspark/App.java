@@ -142,9 +142,31 @@ public class App {
             }
         }, new MustacheTemplateEngine());
 
-
-
         System.out.println("Servidor iniciado en http://localhost:8080");
+        get("/carrito", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+            List<Map<String, Object>> items = new ArrayList<>();
+
+            // Aquí deberías recuperar los productos del carrito (por sesión o base de datos)
+            // Ejemplo ficticio:
+            CarritoController carrito = CarritoManager.getCarrito(req);
+            for (Producto p : carrito.getProductos()) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("id", p.getId());
+                item.put("nombre", p.getNombre());
+                item.put("descripcion", p.getDescripcion());
+                item.put("foto", p.getFoto());
+                item.put("precio", String.format("%.2f", p.getPrecio()));
+                item.put("cantidad", p.getCantidad());
+                item.put("total", String.format("%.2f", p.getPrecio() * p.getCantidad()));
+                items.add(item);
+            }
+
+            model.put("items", items);
+            model.put("totalGeneral", carrito.getTotal());
+            return new ModelAndView(model, "carrito.mustache");
+        }, new MustacheTemplateEngine());
+
     }
 
     private static void enableCORS() {

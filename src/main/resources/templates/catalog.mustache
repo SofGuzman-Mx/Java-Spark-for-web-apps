@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Collectibles</title>
+  <title>New Collectibles online</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -43,7 +43,16 @@
                     <img src="{{foto}}" class="card-img-top" alt="{{nombre}}">
                     <div class="card-body">
                         <h5 class="card-title">{{nombre}}</h5>
-                        <p class="card-text"><strong>${{prec}}</strong></p>
+                        <p class="card-text">
+                            {{#oferta}}
+                                <span class="text-muted text-decoration-line-through">${{precioOriginal}}</span>
+                                <span class="fw-bold text-danger ms-2">${{prec}}</span>
+                            {{/oferta}}
+                            {{^oferta}}
+                                <span class="fw-bold">${{prec}}</span>
+                            {{/oferta}}
+                        </p>
+
 
                         <!-- Botón para ver más -->
                         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal{{id}}">See more</button>
@@ -51,7 +60,7 @@
                         <!-- Botón para agregar al carrito -->
                         <form method="POST" action="/carrito/add" class="d-inline">
                             <input type="hidden" name="id" value="{{id}}">
-                            <button type="submit" class="btn btn-success">Add to cart</button>
+                            <button type="submit" class="btn btn-success">Add</button>
                         </form>
                     </div>
                 </div>

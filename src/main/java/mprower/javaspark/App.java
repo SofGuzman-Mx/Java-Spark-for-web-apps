@@ -148,41 +148,54 @@ public class App {
 
         get("/carrito", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
-            List<Map<String, Object>> items = new ArrayList<>();
+            model.put("title", "Tu Carrito de Compras");
 
             try {
-                int clienteId = 1; // Simulado, puedes reemplazar con sesión o token
-
+                int clienteId = 1; // Simulamos el cliente 1
                 CarritoRepository repo = new CarritoRepository();
-                List<CarritoItem> carritoCliente = new ArrayList<>(repo.getCarritoByClienteId(clienteId));
+
+                // Obtenemos los items del carrito para el cliente simulado
+                Collection<CarritoItem> itemsDelCarrito = repo.getCarritoByClienteId(clienteId);
+
+                // Preparamos los datos para la vista, enriqueciéndolos con detalles del producto
+                List<Map<String, Object>> itemsParaVista = new ArrayList<>();
                 double totalGeneral = 0;
 
-                for (CarritoItem item : carritoCliente) {
-                    Map<String, Object> map = new HashMap<>();
-                    Producto p = item.producto;
+                ProductoRepository productoRepo = new ProductoRepository();
+                for (CarritoItem item : itemsDelCarrito) {
+                    // Usamos el id_pro del item del carrito para buscar el producto
+                    Optional<Producto> productoOpt = productoRepo.getProductoById(item.id_pro); // <-- CORREGIDO
+                    if (productoOpt.isPresent()) {
+                        Producto p = productoOpt.get();
+                        Map<String, Object> itemData = new HashMap<>();
 
-                    map.put("id", item.id);
-                    map.put("nombre", p.getNombre());
-                    map.put("descripcion", p.getDescripcion());
-                    map.put("foto", p.getFoto());
-                    map.put("precio", String.format("%.2f", p.getPrecio()));
-                    map.put("cantidad", item.cantidad);
-                    map.put("total", String.format("%.2f", p.getPrecio() * item.cantidad));
+                        // Accedemos directamente a los campos públicos
+                        itemData.put("idCarrito", item.id);               // <-- CORREGIDO
+                        itemData.put("foto", "/img/" + p.foto);           // <-- CORREGIDO
+                        itemData.put("nombre", p.nombre);                 // <-- CORREGIDO
+                        itemData.put("descripcion", p.descripcion);       // <-- CORREGIDO
+                        itemData.put("precio", p.precio);                 // <-- CORREGIDO
+                        itemData.put("cantidad", item.cantidad);          // <-- CORREGIDO
 
-                    totalGeneral += p.getPrecio() * item.cantidad;
-                    items.add(map);
+                        double totalItem = p.precio * item.cantidad;      // <-- CORREGIDO
+                        itemData.put("total", String.format("%.2f", totalItem));
+
+                        itemsParaVista.add(itemData);
+                        totalGeneral += totalItem;
+                    }
                 }
 
-                model.put("items", items);
+                model.put("items", itemsParaVista);
                 model.put("totalGeneral", String.format("%.2f", totalGeneral));
-                return new ModelAndView(model, "carrito.mustache");
 
             } catch (Exception e) {
-                model.put("items", new ArrayList<>());
+                System.err.println("Error al cargar la página del carrito: " + e.getMessage());
+                e.printStackTrace(); // Imprime el stack trace completo para una mejor depuración
                 model.put("error", "No se pudo cargar el carrito: " + e.getMessage());
-                return new ModelAndView(model, "carrito.mustache");
             }
-        }, new MustacheTemplateEngine());
+
+            return new ModelAndView(model, "carrito.mustache");
+        }, templateEngine);
 
     }
 

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Shopping bag</title>
+    <!-- CORRECCIÓN EN LA URL DEL CSS DE BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -14,7 +15,7 @@
         }
         .cart-item img {
           width: 100px;
-          height: auto;
+          height: 100px; /* Alto fijo para consistencia */
           object-fit: cover;
         }
         .cart-summary {
@@ -27,52 +28,84 @@
           color: #dc3545;
           border: none;
           background: none;
+          padding: 0;
+          font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
+
+<!-- BARRA DE NAVEGACIÓN AÑADIDA DE VUELTA -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Menu</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/catalog">Items</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/offers">Sales</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/carrito">Shopping cart</a> <!-- Marcado como activo -->
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
 <div class="container mt-5">
     <h2 class="mb-4">🛒 Your Shopping bag</h2>
 
     {{#items}}
         <div class="row cart-item align-items-center">
             <div class="col-md-2">
-                <img src="{{foto}}" alt="{{nombre}}">
+                <img src="{{foto}}" alt="{{nombre}}" class="img-fluid rounded">
             </div>
             <div class="col-md-4">
                 <h5>{{nombre}}</h5>
-                <p>{{descripcion}}</p>
+                <p class="text-muted small d-none d-md-block">{{descripcion}}</p> <!-- Oculta descripción en pantallas pequeñas -->
             </div>
             <div class="col-md-2 text-center">
                 <p class="mb-0">Unit: ${{precio}}</p>
                 <p class="text-muted">Qty: {{cantidad}}</p>
             </div>
             <div class="col-md-2 text-center">
-                <strong>Total: ${{total}}</strong>
+                <strong>Subtotal: ${{total}}</strong>
             </div>
             <div class="col-md-2 text-end">
-                <form method="POST" action="/carrito/remove">
-                    <input type="hidden" name="id" value="{{id}}">
-                    <button type="submit" class="btn-remove">🗑 Remove</button>
-                </form>
+                <!-- Por ahora, el botón de eliminar no es funcional, pero lo mostramos -->
+                <button type="button" class="btn-remove" title="Remove item" onclick="alert('Funcionalidad para eliminar no implementada aún.');">🗑</button>
             </div>
         </div>
     {{/items}}
 
     {{^items}}
-        <p class="text-muted">Your cart is empty</p>
+        <div class="alert alert-info mt-4" role="alert">
+            Your cart is empty. <a href="/catalog" class="alert-link">Continue shopping!</a>
+        </div>
     {{/items}}
 
-    <div class="row mt-4">
-        <div class="col-md-6 offset-md-6">
-            <div class="cart-summary">
-                <h5>Total a pagar: <strong>${{totalGeneral}}</strong></h5>
-                <form method="POST" action="/carrito/checkout">
-                    <button type="submit" class="btn btn-dark w-100 mt-3">Checkout</button>
-                </form>
+    <!-- SOLO MUESTRA EL RESUMEN DE PAGO SI HAY ITEMS EN EL CARRITO -->
+    {{#items.size}}
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-6">
+                <div class="cart-summary">
+                    <h5 class="text-end">Total a pagar: <strong class="ms-3">${{totalGeneral}}</strong></h5>
+                    <!-- FORMULARIO DE CHECKOUT ÚNICO Y FUNCIONAL -->
+                    <form method="POST" action="/checkout">
+                        <button type="submit" class="btn btn-dark w-100 mt-3">Proceed to Checkout</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    {{/items.size}}
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

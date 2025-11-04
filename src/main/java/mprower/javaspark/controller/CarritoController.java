@@ -64,30 +64,21 @@ public class CarritoController {
             }
         });
 
-        /**
-         * POST /api/carrito — Agregar un producto al carrito.
-         */
-        post("/api/carrito", (req, res) -> {
-            res.type("application/json");
+        // Endpoint para agregar al carrito desde formulario HTML (sin autenticación por ahora)
+        post("/carrito/add", (req, res) -> {
             try {
-                int clienteId = autenticar(req); // Autenticación dentro del endpoint
+                int idProducto = Integer.parseInt(req.queryParams("id"));
+                int cantidad = 1; // Por defecto 1 unidad
 
-                AddItemRequest data = gson.fromJson(req.body(), AddItemRequest.class);
-                if (data == null) {
-                    res.status(400); // Bad Request
-                    return gson.toJson(new ErrorResponse("400", "Cuerpo de la petición (Body) está vacío o mal formado."));
-                }
+                // Aquí puedes usar una sesión o lógica temporal para simular un carrito
+                System.out.println("Producto agregado al carrito desde HTML: ID = " + idProducto);
 
-                CarritoItem nuevoItem = repository.agregarAlCarrito(clienteId, data.idProducto, data.cantidad);
-                res.status(201); // 201 Created
-                return gson.toJson(nuevoItem);
+                // Redirigir de vuelta al catálogo o mostrar mensaje
+                res.redirect("/catalog");
+                return null;
             } catch (Exception e) {
-                if (e instanceof com.auth0.jwt.exceptions.JWTVerificationException) {
-                    res.status(401);
-                    return gson.toJson(new ErrorResponse("401", "Token inválido o expirado: " + e.getMessage()));
-                }
-                res.status(500);
-                return gson.toJson(new ErrorResponse("500", "Error al agregar al carrito: " + e.getMessage()));
+                res.status(400);
+                return "Error al agregar producto al carrito: " + e.getMessage();
             }
         });
 

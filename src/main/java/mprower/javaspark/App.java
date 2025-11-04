@@ -8,8 +8,12 @@ import mprower.javaspark.model.Cliente;
 import java.util.*;
 import static spark.Spark.*;
 
+import mprower.javaspark.model.Producto;
+import mprower.javaspark.repository.ProductoRepository;
 import spark.ModelAndView;
+import spark.Spark;
 import spark.template.mustache.MustacheTemplateEngine;
+
 
 public class App {
     public static void main(String[] args) {
@@ -18,6 +22,7 @@ public class App {
         staticFiles.location("/public");
 
         // Habilitar CORS para la API
+        // Habilitar CORS
         enableCORS();
 
         // Inicializar Controladores de la API

@@ -7,7 +7,10 @@ import mprower.javaspark.repository.ClienteRepository;
 import mprower.javaspark.util.Auth;
 import mprower.javaspark.util.ErrorResponse;
 import org.mindrot.jbcrypt.BCrypt;
+import spark.ModelAndView;
+import spark.template.mustache.MustacheTemplateEngine;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,7 +59,7 @@ public class ClienteController {
         post("/api/login", (req, res) -> {
             res.type("application/json");
             try {
-                // Leer parámetros del formulario
+                // ✅ Leer parámetros del formulario
                 String nombre = req.queryParams("nombre");
                 String password = req.queryParams("password");
 
@@ -81,4 +84,5 @@ public class ClienteController {
         });
 
     }
+
 }

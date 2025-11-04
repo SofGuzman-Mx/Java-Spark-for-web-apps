@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>New Collectibles online</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Catálogo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -40,7 +40,7 @@
         {{#items}}
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="{{foto}}" class="card-img-top" alt="{{nombre}}">
+                    <img src="/img/{{foto}}" class="card-img-top" alt="{{nombre}}">
                     <div class="card-body">
                         <h5 class="card-title">{{nombre}}</h5>
                         <p class="card-text">
@@ -58,7 +58,7 @@
                         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal{{id}}">See more</button>
 
                         <!-- Botón para agregar al carrito -->
-                        <form method="POST" action="/carrito/add" class="d-inline">
+                        <form method="POST" action="/api/carrito" class="d-inline">
                             <input type="hidden" name="id" value="{{id}}">
                             <button type="submit" class="btn btn-success">Add</button>
                         </form>
@@ -75,13 +75,13 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                         </div>
                         <div class="modal-body">
-                            <img src="{{foto}}" class="card-img-top" alt="{{nombre}}">
+                            <img src="/img/{{foto}}" class="card-img-top" alt="{{nombre}}">
                             <p>{{descripcion}}</p>
                             <p><strong>Precio:</strong> ${{prec}}</p>
                             <p><strong>ID:</strong> {{id}}</p>
                         </div>
                         <div class="modal-footer">
-                            <form method="POST" action="/carrito/add">
+                            <form method="POST" action="/api/carrito">
                                 <input type="hidden" name="id" value="{{id}}">
                                 <button type="submit" class="btn btn-success">Add to cart</button>
                             </form>

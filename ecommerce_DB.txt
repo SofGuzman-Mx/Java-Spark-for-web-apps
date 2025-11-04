@@ -99,13 +99,14 @@ INSERT INTO descripcion (descripcion) VALUES ('Un jersey autografiado por el leg
 INSERT INTO descripcion (descripcion) VALUES ('Un crop-top usado y autografiado por la famosa rapera Cardi B. en su última visita a México'); -- id 6
 INSERT INTO descripcion (descripcion) VALUES ('Una guitarra eléctrica autografiada por la popular banda británica Coldplay, un día antes de su concierto en Monterrey en 2022.'); -- id 7
 
-INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Gorra autografiada por Peso Pluma', 621.34, 'gorra_pp.jpg', 10, 1);
-INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Casco autografiado por Rosalía', 734.57, 'casco_rosalia.jpg', 5, 2);
-INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Chamarra de Bad Bunny', 521.89, 'chamarra_bb.jpg', 8, 3);
-INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Guitarra de Fernando Delgadillo', 823.12, 'guitarra_fd.jpg', 3, 4);
-INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Jersey firmado por Snoop Dogg', 355.67, 'jersey_snoop.jpg', 15, 5);
-INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Prenda de Cardi B autografiada', 674.23, 'prenda_cardib.jpg', 7, 6);
-INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Guitarra autografiada por Coldplay', 458.91, 'guitarra_coldplay.jpg', 4, 7);
+INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES
+('Gorra autografiada por Peso Pluma', 621.34, 'gorraPP.jpg', 10, 1),
+('Casco autografiado por Rosalía', 734.57, 'cascoRosalia.jpg', 4, 2),
+('Chamarra de Bad Bunny', 521.89, 'chamarraBB.png', 8, 3),
+('Guitarra de Fernando Delgadillo', 823.12, 'guitarraFD.jpg', 3, 4),
+('Jersey firmado por Snoop Dogg', 355.67, 'jerseySD.png', 15, 5),
+('Prenda de Cardi B autografiada', 674.23, 'playeraCB.png', 7, 6),
+('Guitarra autografiada por Coldplay', 458.91, 'guitarraColdplay.png', 3, 7);
 
 insert into oferta values (null,4);
 insert into oferta values (null,5);

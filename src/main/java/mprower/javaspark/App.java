@@ -40,13 +40,11 @@ public class App {
             return new ModelAndView(model, "login.mustache");
         }, templateEngine);
 
-        // --- NUEVA RUTA PARA LA PÁGINA DE REGISTRO ---
         get("/signup", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
             model.put("title", "Registro de Nuevo Usuario");
             return new ModelAndView(model, "signup.mustache");
-        }, templateEngine);
-
+        }, new MustacheTemplateEngine());
 
         System.out.println("Servidor iniciado en http://localhost:8080");
     }

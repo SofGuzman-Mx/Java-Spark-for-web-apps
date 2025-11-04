@@ -267,3 +267,7 @@ Updates the quantity of a specific item in the cart. :id is the ID of the *recor
 
 #### DELETE /api/carrito/:id
 Deletes an item from the cart by its ID.
+
+Sprint 3. 
+
+![img.png](img.png)

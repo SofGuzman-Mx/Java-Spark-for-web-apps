@@ -184,32 +184,6 @@ public class App {
             }
         }, new MustacheTemplateEngine());
 
-        post("/carrito/add", (req, res) -> {
-            int idProducto = Integer.parseInt(req.queryParams("id"));
-            int cantidad = 1;
-
-            // Obtener el carrito desde sesión, o crear uno nuevo
-            List<CarritoItem> carrito = req.session().attribute("carrito");
-            if (carrito == null) {
-                carrito = new ArrayList<>();
-            }
-
-            // Crear el item y agregarlo
-            CarritoItem item = new CarritoItem();
-            item.id_pro = idProducto;
-            item.cantidad = cantidad;
-            item.id_cli = 1; // Simulado, puedes usar sesión real
-            item.producto = new ProductoRepository().getProductoById(IdProducto); // si tienes este método
-
-            carrito.add(item);
-            req.session().attribute("carrito", carrito);
-
-            System.out.println("Producto agregado: " + item.producto.getNombre());
-            res.redirect("/catalog");
-            return null;
-        });
-
-
     }
 
     private static void enableCORS() {

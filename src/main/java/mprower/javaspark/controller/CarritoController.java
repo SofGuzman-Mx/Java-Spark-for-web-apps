@@ -1,5 +1,5 @@
 package mprower.javaspark.controller;
-
+import mprower.javaspark.model.Producto;
 import com.google.gson.Gson;
 import mprower.javaspark.model.CarritoItem;
 import mprower.javaspark.repository.CarritoRepository;
@@ -143,6 +143,7 @@ public class CarritoController {
                 return gson.toJson(new ErrorResponse("500", "Error al eliminar el item: " + e.getMessage()));
             }
         });
+
     }
 
     // --- Clases internas para representar los cuerpos de las peticiones (Request Bodies) ---

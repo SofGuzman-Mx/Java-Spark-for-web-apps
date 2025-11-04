@@ -9,13 +9,15 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.*;
 import static spark.Spark.*;
 
-import java.util.*;
 import static spark.Spark.*;
 
+import mprower.javaspark.model.CarritoItem;
 import mprower.javaspark.model.Producto;
+import mprower.javaspark.repository.CarritoRepository;
 import mprower.javaspark.repository.ProductoRepository;
 import spark.ModelAndView;
 import spark.template.mustache.MustacheTemplateEngine;
@@ -143,29 +145,70 @@ public class App {
         }, new MustacheTemplateEngine());
 
         System.out.println("Servidor iniciado en http://localhost:8080");
+
         get("/carrito", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
             List<Map<String, Object>> items = new ArrayList<>();
 
-            // Aquí deberías recuperar los productos del carrito (por sesión o base de datos)
-            // Ejemplo ficticio:
-            CarritoController carrito = CarritoManager.getCarrito(req);
-            for (Producto p : carrito.getProductos()) {
-                Map<String, Object> item = new HashMap<>();
-                item.put("id", p.getId());
-                item.put("nombre", p.getNombre());
-                item.put("descripcion", p.getDescripcion());
-                item.put("foto", p.getFoto());
-                item.put("precio", String.format("%.2f", p.getPrecio()));
-                item.put("cantidad", p.getCantidad());
-                item.put("total", String.format("%.2f", p.getPrecio() * p.getCantidad()));
-                items.add(item);
+            try {
+                int clienteId = 1; // Simulado, puedes reemplazar con sesión o token
+
+                CarritoRepository repo = new CarritoRepository();
+                List<CarritoItem> carritoCliente = new ArrayList<>(repo.getCarritoByClienteId(clienteId));
+                double totalGeneral = 0;
+
+                for (CarritoItem item : carritoCliente) {
+                    Map<String, Object> map = new HashMap<>();
+                    Producto p = item.producto;
+
+                    map.put("id", item.id);
+                    map.put("nombre", p.getNombre());
+                    map.put("descripcion", p.getDescripcion());
+                    map.put("foto", p.getFoto());
+                    map.put("precio", String.format("%.2f", p.getPrecio()));
+                    map.put("cantidad", item.cantidad);
+                    map.put("total", String.format("%.2f", p.getPrecio() * item.cantidad));
+
+                    totalGeneral += p.getPrecio() * item.cantidad;
+                    items.add(map);
+                }
+
+                model.put("items", items);
+                model.put("totalGeneral", String.format("%.2f", totalGeneral));
+                return new ModelAndView(model, "carrito.mustache");
+
+            } catch (Exception e) {
+                model.put("items", new ArrayList<>());
+                model.put("error", "No se pudo cargar el carrito: " + e.getMessage());
+                return new ModelAndView(model, "carrito.mustache");
+            }
+        }, new MustacheTemplateEngine());
+
+        post("/carrito/add", (req, res) -> {
+            int idProducto = Integer.parseInt(req.queryParams("id"));
+            int cantidad = 1;
+
+            // Obtener el carrito desde sesión, o crear uno nuevo
+            List<CarritoItem> carrito = req.session().attribute("carrito");
+            if (carrito == null) {
+                carrito = new ArrayList<>();
             }
 
-            model.put("items", items);
-            model.put("totalGeneral", carrito.getTotal());
-            return new ModelAndView(model, "carrito.mustache");
-        }, new MustacheTemplateEngine());
+            // Crear el item y agregarlo
+            CarritoItem item = new CarritoItem();
+            item.id_pro = idProducto;
+            item.cantidad = cantidad;
+            item.id_cli = 1; // Simulado, puedes usar sesión real
+            item.producto = new ProductoRepository().getProductoById(IdProducto); // si tienes este método
+
+            carrito.add(item);
+            req.session().attribute("carrito", carrito);
+
+            System.out.println("Producto agregado: " + item.producto.getNombre());
+            res.redirect("/catalog");
+            return null;
+        });
+
 
     }
 

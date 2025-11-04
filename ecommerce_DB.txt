@@ -31,6 +31,15 @@ constraint primary key(id)
 
 desc producto;
 
+create table oferta(
+id int auto_increment not null,
+id_pro int,
+constraint foreign key(id_pro) references producto(id),
+constraint primary key(id)
+);
+
+desc oferta;
+
 create table carrito (
 id int auto_increment,
 id_cli int,
@@ -97,3 +106,7 @@ INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Guitarra 
 INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Jersey firmado por Snoop Dogg', 355.67, 'jersey_snoop.jpg', 15, 5);
 INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Prenda de Cardi B autografiada', 674.23, 'prenda_cardib.jpg', 7, 6);
 INSERT INTO producto (nombre, prec, foto, cantidad, id_descr) VALUES ('Guitarra autografiada por Coldplay', 458.91, 'guitarra_coldplay.jpg', 4, 7);
+
+insert into oferta values (null,4);
+insert into oferta values (null,5);
+insert into oferta values (null,6);

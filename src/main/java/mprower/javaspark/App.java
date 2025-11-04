@@ -15,13 +15,33 @@ public class App {
     public static void main(String[] args) {
         port(8080);
 
-        // Habilitar CORS
+        staticFiles.location("/public");
+
+        // Habilitar CORS para la API
         enableCORS();
 
-        // Inicializar controladores
+        // Inicializar Controladores de la API
         new ClienteController();
         new ProductoController();
-        new CarritoController(); // Cuando lo implementes
+        new CarritoController();
+
+        // --- Definir Rutas de Vistas HTML ---
+        MustacheTemplateEngine templateEngine = new MustacheTemplateEngine();
+
+        // Ruta para la página de login
+        get("/login", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+            model.put("title", "Iniciar sesión - Coleccionables");
+            return new ModelAndView(model, "login.mustache");
+        }, templateEngine);
+
+        // --- NUEVA RUTA PARA LA PÁGINA DE REGISTRO ---
+        get("/signup", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+            model.put("title", "Registro de Nuevo Usuario");
+            return new ModelAndView(model, "signup.mustache");
+        }, templateEngine);
+
 
         System.out.println("Servidor iniciado en http://localhost:8080");
     }
@@ -43,16 +63,5 @@ public class App {
             response.header("Access-Control-Allow-Headers", "*");
             response.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         });
-
-        get("/login", (req, res) -> {
-            return renderLoginView();
-        }, new MustacheTemplateEngine());
-
-    }
-
-    private static ModelAndView renderLoginView() {
-        Map<String, Object> model = new HashMap<>();
-        model.put("title", "Iniciar sesión - Coleccionables");
-        return new ModelAndView(model, "login.mustache");
     }
 }

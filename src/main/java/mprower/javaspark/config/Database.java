@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class Database {
     private static final String URL = "jdbc:mysql://localhost:3306/ecommerce";
     private static final String USER = "root";
-    private static final String PASSWORD = "3350mysql";
+    private static final String PASSWORD = "Carlish#13";
 
     // Cargar el driver una sola vez
     static {

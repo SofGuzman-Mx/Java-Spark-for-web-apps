@@ -1,5 +1,3 @@
-Oye estaba viendo que el readme lo subi en español, aquí ya está traducido al inglés:
-
 # E-commerce API with Java Spark
 
 This project is a RESTful API for a basic e-commerce system, developed using the *Java Spark* micro-framework. The API supports customer management, product catalog viewing, and shopping cart administration. Authentication is handled via JSON Web Tokens (JWT).

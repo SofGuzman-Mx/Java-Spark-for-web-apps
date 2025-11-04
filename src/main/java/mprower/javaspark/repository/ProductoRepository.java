@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
+import mprower.javaspark.model.Producto; // Asegúrate de que la ruta sea correcta
+import mprower.javaspark.config.Database;
+
 public class ProductoRepository {
 
     public Collection<Producto> getAllProductos() throws SQLException {
@@ -38,6 +41,33 @@ public class ProductoRepository {
         }
         return Optional.empty();
     }
+
+    /**
+     * Obtiene una lista de todos los productos que están marcados como oferta.
+     * Reutiliza la lógica de mapeo y se une a la tabla de ofertas y descripciones.
+     * @return Una colección de objetos Producto en oferta.
+     * @throws SQLException si ocurre un error en la base de datos.
+     */
+    public Collection<Producto> getProductosEnOferta() throws SQLException {
+        Collection<Producto> productos = new ArrayList<>();
+        // Este SQL es la clave: une producto, oferta y descripcion para obtener toda la info.
+        String sql = "SELECT p.*, d.descripcion " +
+                "FROM producto p " +
+                "JOIN oferta o ON p.id = o.id_pro " +
+                "JOIN descripcion d ON p.id_descr = d.id";
+
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                // Reutilizamos tu método existente para convertir la fila en un objeto Producto. ¡Perfecto!
+                productos.add(mapRowToProducto(rs));
+            }
+        }
+        return productos;
+    }
+
 
     // CRUD de productos (Create, Update, Delete) puede ser añadido aquí
 

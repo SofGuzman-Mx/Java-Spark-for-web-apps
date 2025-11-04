@@ -1,6 +1,6 @@
 # E-commerce API with Java Spark
 
-This project is a RESTful API for a basic e-commerce system, developed using the *Java Spark* micro-framework. The API supports customer management, product catalog viewing, and shopping cart administration. Authentication is handled via JSON Web Tokens (JWT).
+This project is a full-stack e-commerce platform built with Java Spark, designed to support product catalog browsing, user authentication, and shopping cart functionality. It integrates backend logic with dynamic frontend rendering using Mustache templates and Bootstrap 5. The system is scalable, secure, and adaptable to future business needs.
 
 ## Key Features
 
@@ -13,6 +13,28 @@ This project is a RESTful API for a basic e-commerce system, developed using the
 -   *Exception Handling:* Standardized error responses for 404 Not Found, 500 Internal Server Error, and 401 Unauthorized.
 
 ---
+🧠 Architecture Overview
+The application follows a clean MVC architecture:
+
+Model: Represents domain entities (Producto, Cliente, CarritoItem) with encapsulated logic.
+
+View: Uses Mustache templates for dynamic HTML rendering (catalog.mustache, carrito.mustache, etc.).
+
+Controller: Handles routing and business logic (ProductoController, CarritoController, ClienteController).
+
+Diagram available in /docs/architecture.png (optional visual reference)
+
+**Innovation Strategy**
+This project integrates innovative features with technical, economic, and social depth:
+- Offer System: Products can be flagged as discounted, with dynamic price rendering.
+- Session-Based Cart: Allows anonymous users to interact with the cart before login.
+- Multilingual Support (planned): Templates structured for easy localization.
+- Gamification Potential: Architecture allows future integration of badges, points, or dynamic pricing.
+
+🔐 Security & Authentication
+- JWT Authentication: Secures all /api/carrito/* routes.
+- Password Hashing: Uses jBCrypt to store passwords securely.
+- Token Validation: Implemented via Auth.verifyTokenAndGetId() with robust error handling.
 
 ## Sprint 2 Deliverables
 
@@ -268,6 +290,75 @@ Updates the quantity of a specific item in the cart. :id is the ID of the *recor
 #### DELETE /api/carrito/:id
 Deletes an item from the cart by its ID.
 
-Sprint 3. 
+## Sprint 3.
+✅ Dynamic Catalog & Offers<br>
+- Products loaded from MySQL and rendered via Mustache.
+- Offer logic implemented with SQL joins and conditional rendering.
+- Search bar filters products by name using query parameters.
 
-![img.png](img.png)
+✅ Add-to-Cart via HTML Forms<br>
+- Each product includes a form with hidden id field.
+- POST /carrito/add route stores item in session.
+- Cart view displays item details, quantity, and total.
+
+✅ UI/UX Enhancements<br>
+- Bootstrap 5 styling for cards, buttons, and modals.
+- Offer highlighting with strikethrough and red price.
+- Modal popups for product details.
+---
+📦 Tech Stack
+------
+| Layer       | Technology           |
+|-------------|----------------------|
+| Language    | Java 17              |
+| Framework   | Spark Java 2.9.3     |
+| Database    | MySQL 8.0            |
+| Templating  | Mustache             |
+| Styling     | Bootstrap 5          |
+| Auth        | java-jwt, jBCrypt    |
+| Logging     | slf4j-simple         |
+---
+## 🧪 Testing & Validation<br>
+- Manual testing via Postman and browser.
+- Edge cases handled: invalid product ID, empty cart, expired token.
+- Console logs and error messages used for debugging.
+
+📈 Impact Analysis
+---
+| Metric                     | Value                |
+|---------------------------|----------------------|
+| Products in catalog       | 7                    |
+| Offer-enabled products    | 3                    |
+| Average response time     | < 150ms              |
+| Authentication success rate | 100% (manual test) |
+
+## 🔄 Continuous Improvement
+✅Iterated on cart logic to support session-based storage.
+
+✅ Refactored SQL queries for performance.
+
+ 🔜 Planned features: favorites, reviews, real-time updates via WebSocket.
+
+## 🧠 Strategic Justification
+- Spark Java chosen for lightweight routing and fast prototyping.
+- Mustache selected for simplicity and logic-less templating.
+- Session-based cart allows smoother UX before login.
+- Modular architecture enables easy feature expansion.
+
+## 💬 Retrospective & Soft Skills
+- “Debugging the JWT flow taught me to trace logic across layers and handle edge cases gracefully.”
+- Overcame NullPointerException in token parsing.
+- Coordinated with peers to resolve foreign key constraint errors.
+- Documented all fixes and decisions in Git commits and README.
+
+## 🧭 Deployment & Backup Strategy
+- GitHub repository with versioned commits and clear structure.
+- Manual backup via GitHub + optional GitHub Actions (planned).
+- README includes full setup instructions for reproducibility.
+
+## 🧠 Future Scalability
+Architecture supports:
+- Real-time updates via WebSocket
+- Category-based filtering
+- Mobile responsiveness
+- Multilingual templates

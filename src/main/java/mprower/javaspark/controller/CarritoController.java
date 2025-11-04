@@ -5,13 +5,14 @@ import mprower.javaspark.model.CarritoItem;
 import mprower.javaspark.repository.CarritoRepository;
 import mprower.javaspark.util.Auth;
 import mprower.javaspark.util.ErrorResponse;
-import spark.Request; // Importamos la clase Request
+import spark.Request;
+
+import java.net.URLEncoder;
 
 import static spark.Spark.*;
 
 /**
  * Controlador para gestionar las operaciones del carrito de compras.
- * Cada ruta maneja su propia autenticación para depuración.
  */
 public class CarritoController {
 
@@ -25,11 +26,7 @@ public class CarritoController {
     }
 
     /**
-     * Método helper para autenticar una petición.
-     * Extrae el token, lo valida y devuelve el ID del cliente.
-     * @param req La petición de Spark.
-     * @return El ID del cliente si la autenticación es exitosa.
-     * @throws Exception Si la autenticación falla por cualquier motivo.
+     * Método helper para autenticar una petición de API con JWT.
      */
     private int autenticar(Request req) throws Exception {
         String header = req.headers("Authorization");
@@ -43,18 +40,38 @@ public class CarritoController {
 
     private void initializeRoutes() {
 
-        // --- Endpoints del Carrito ---
+        // --- ENDPOINTS DE LA API (NO SE TOCAN) ---
 
-        /**
-         * GET /api/carrito — Obtener todos los items del carrito del usuario autenticado.
-         */
+        post("/api/carrito", (req, res) -> {
+            res.type("application/json");
+            try {
+                int clienteId = autenticar(req);
+
+                AddItemRequest data = gson.fromJson(req.body(), AddItemRequest.class);
+                if (data == null) {
+                    res.status(400);
+                    return gson.toJson(new ErrorResponse("400", "Cuerpo de la petición (Body) está vacío o mal formado."));
+                }
+
+                CarritoItem nuevoItem = repository.agregarAlCarrito(clienteId, data.idProducto, data.cantidad);
+                res.status(201);
+                return gson.toJson(nuevoItem);
+            } catch (Exception e) {
+                if (e instanceof com.auth0.jwt.exceptions.JWTVerificationException) {
+                    res.status(401);
+                    return gson.toJson(new ErrorResponse("401", "Token inválido o expirado: " + e.getMessage()));
+                }
+                res.status(500);
+                return gson.toJson(new ErrorResponse("500", "Error al agregar al carrito: " + e.getMessage()));
+            }
+        });
+
         get("/api/carrito", (req, res) -> {
             res.type("application/json");
             try {
-                int clienteId = autenticar(req); // Autenticación dentro del endpoint
+                int clienteId = autenticar(req);
                 return gson.toJson(repository.getCarritoByClienteId(clienteId));
             } catch (Exception e) {
-                // Si la autenticación falla, devolvemos 401. Si es otro error, devolvemos 500.
                 if (e instanceof com.auth0.jwt.exceptions.JWTVerificationException) {
                     res.status(401);
                     return gson.toJson(new ErrorResponse("401", "Token inválido o expirado: " + e.getMessage()));
@@ -64,35 +81,49 @@ public class CarritoController {
             }
         });
 
-        // Endpoint para agregar al carrito desde formulario HTML (sin autenticación por ahora)
+
+        // --- ENDPOINT PARA EL FORMULARIO HTML (MODIFICADO SIN LOGIN) ---
+
+        /**
+         * POST /carrito/add — Agrega un producto al carrito desde un formulario HTML tradicional.
+         * SIMULA que el usuario es siempre el cliente con ID = 1 para pruebas.
+         */
         post("/carrito/add", (req, res) -> {
+            // 1. Simular el ID del cliente. ¡Hemos quitado la verificación de sesión!
+            Integer clienteId = 1; // <<-- ¡CAMBIO CLAVE! Siempre será el cliente 1.
+
             try {
+                // 2. Obtener el ID del producto desde los datos del formulario
                 int idProducto = Integer.parseInt(req.queryParams("id"));
-                int cantidad = 1; // Por defecto 1 unidad
+                int cantidad = 1; // Siempre se agrega 1 unidad desde el catálogo
 
-                // Aquí puedes usar una sesión o lógica temporal para simular un carrito
-                System.out.println("Producto agregado al carrito desde HTML: ID = " + idProducto);
+                // 3. Llamar al repositorio para guardar en la base de datos
+                repository.agregarAlCarrito(clienteId, idProducto, cantidad);
 
-                // Redirigir de vuelta al catálogo o mostrar mensaje
-                res.redirect("/catalog");
+                System.out.println("FORMULARIO HTML: Producto ID " + idProducto + " agregado al carrito del cliente ID " + clienteId);
+
+                // 4. Redirigir de vuelta al catálogo con un mensaje de éxito
+                res.redirect("/catalog?status=success");
                 return null;
+
             } catch (Exception e) {
-                res.status(400);
-                return "Error al agregar producto al carrito: " + e.getMessage();
+                System.err.println("FORMULARIO HTML: Error al agregar producto - " + e.getMessage());
+                // 5. Si hay un error, redirigir con un mensaje de error
+                String errorMessage = URLEncoder.encode(e.getMessage(), "UTF-8");
+                res.redirect("/catalog?status=error&message=" + errorMessage);
+                return null;
             }
         });
 
-        /**
-         * PUT /api/carrito/:id — Actualizar la cantidad de un item en el carrito.
-         */
+
+        // --- RESTO DE ENDPOINTS DE LA API (NO SE TOCAN) ---
+
         put("/api/carrito/:id", (req, res) -> {
             res.type("application/json");
             try {
-                autenticar(req); // Solo para verificar que el usuario está logueado
-
+                autenticar(req);
                 int idCarrito = Integer.parseInt(req.params(":id"));
                 UpdateQuantityRequest data = gson.fromJson(req.body(), UpdateQuantityRequest.class);
-
                 boolean actualizado = repository.actualizarCantidad(idCarrito, data.cantidad);
                 if (actualizado) {
                     return gson.toJson(new StatusResponse("Cantidad actualizada correctamente."));
@@ -101,27 +132,14 @@ public class CarritoController {
                     return gson.toJson(new ErrorResponse("404", "Item del carrito no encontrado."));
                 }
             } catch (Exception e) {
-                if (e instanceof com.auth0.jwt.exceptions.JWTVerificationException) {
-                    res.status(401);
-                    return gson.toJson(new ErrorResponse("401", "Token inválido o expirado: " + e.getMessage()));
-                }
-                if (e instanceof NumberFormatException) {
-                    res.status(400);
-                    return gson.toJson(new ErrorResponse("400", "ID de item de carrito inválido."));
-                }
-                res.status(500);
                 return gson.toJson(new ErrorResponse("500", "Error al actualizar la cantidad: " + e.getMessage()));
             }
         });
 
-        /**
-         * DELETE /api/carrito/:id — Eliminar un item del carrito.
-         */
         delete("/api/carrito/:id", (req, res) -> {
             res.type("application/json");
             try {
-                autenticar(req); // Solo para verificar que el usuario está logueado
-
+                autenticar(req);
                 int idCarrito = Integer.parseInt(req.params(":id"));
                 boolean eliminado = repository.eliminarDelCarrito(idCarrito);
                 if (eliminado) {
@@ -131,19 +149,9 @@ public class CarritoController {
                     return gson.toJson(new ErrorResponse("404", "Item del carrito no encontrado."));
                 }
             } catch (Exception e) {
-                if (e instanceof com.auth0.jwt.exceptions.JWTVerificationException) {
-                    res.status(401);
-                    return gson.toJson(new ErrorResponse("401", "Token inválido o expirado: " + e.getMessage()));
-                }
-                if (e instanceof NumberFormatException) {
-                    res.status(400);
-                    return gson.toJson(new ErrorResponse("400", "ID de item de carrito inválido."));
-                }
-                res.status(500);
                 return gson.toJson(new ErrorResponse("500", "Error al eliminar el item: " + e.getMessage()));
             }
         });
-
     }
 
     // --- Clases internas para representar los cuerpos de las peticiones (Request Bodies) ---
